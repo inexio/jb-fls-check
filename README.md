@@ -1,5 +1,8 @@
 # JB-FLS-CHECK
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/inexio/jb-fls-check)](https://goreportcard.com/report/github.com/inexio/jb-fls-check)
+[![GitHub license](https://img.shields.io/badge/license-BSD-blue.svg)](https://github.com/inexio/check_eve_ng/blob/master/LICENSE)
+[![GitHub code style](https://img.shields.io/badge/code%20style-uber--go-brightgreen)](https://github.com/uber-go/guide/blob/master/style.md)
+[![GoDoc doc](https://img.shields.io/badge/godoc-reference-blue)](https://godoc.org/github.com/inexio/jb-fls-check)
 ## Description
 
 Monitoring check plugin to check health, version, connection, period report of the [jetbrains floating license server](https://www.jetbrains.com/de-de/license-server/).  
