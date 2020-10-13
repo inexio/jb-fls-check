@@ -28,12 +28,12 @@ And if the server is connected to the account services from JetBrains, the curre
 			debug = true
 		}
 		if viper.GetBool("getHealth") {
-			url := buildURL(https, hostname, endpoint, "hostname.health_endpoint")
+			url := buildURL(https, hostname, endpoint, "hostname.health_endpoint", "/health")
 			errSlice := check.GetHealthCheck(url, debug)
 			check.OutputMonitoring(errSlice, "server health checked", nil)
 		}
 		if viper.GetBool("getConnection") {
-			url := buildURL(https, hostname, endpoint, "hostname.connection_endpoint")
+			url := buildURL(https, hostname, endpoint, "hostname.connection_endpoint", "/check-connection")
 
 			errSlice := check.GetConnectionCheck(url, debug)
 			check.OutputMonitoring(errSlice, "server connection checked", nil)
@@ -41,7 +41,7 @@ And if the server is connected to the account services from JetBrains, the curre
 		if viper.GetBool("getVersion") {
 			var throwCritical bool
 
-			url := buildURL(https, hostname, endpoint, "hostname.version_endpoint")
+			url := buildURL(https, hostname, endpoint, "hostname.version_endpoint", "/check-version")
 			if viper.GetBool("throwCritical") {
 				throwCritical = true
 			}
@@ -94,10 +94,7 @@ func initConfig() {
 		viper.SetEnvPrefix("JB_FLS_CHECK")
 		viper.AutomaticEnv() // read in environment variables that match
 
-		err = viper.ReadInConfig()
-		if err != nil {
-			fmt.Println("Found an Error", err)
-		}
+		_ = viper.ReadInConfig()
 
 	}
 }
@@ -112,11 +109,19 @@ func Execute() {
 	}
 }
 
-func buildURL(https bool, hostname string, endpoint string, EndpointConfigString string) string {
+func buildURL(https bool, hostname string, endpoint string, EndpointConfigString string, defaultEndpoint string) string {
 	var prefix string
-	if endpoint == "" {
-		endpoint = viper.GetString(EndpointConfigString)
+	var currentEndpoint string
+	if endpoint != "" {
+		currentEndpoint = endpoint
 	}
+	if currentEndpoint == "" && EndpointConfigString != "" {
+		currentEndpoint = viper.GetString(EndpointConfigString)
+	}
+	if currentEndpoint == "" && defaultEndpoint != "" {
+		currentEndpoint = defaultEndpoint
+	}
+
 	if https != true {
 		prefix = "http://"
 	} else {
@@ -126,7 +131,7 @@ func buildURL(https bool, hostname string, endpoint string, EndpointConfigString
 		hostname = viper.GetString("hostname.hostname")
 	}
 
-	url := prefix + hostname + endpoint
+	url := prefix + hostname + currentEndpoint
 
 	return url
 }
