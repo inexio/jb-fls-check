@@ -1,0 +1,8 @@
+hostname:
+    hostname: "<yourHostname>"
+    report_endpoint: "/reportapi"
+    health_endpoint: "/health"
+    connection_endpoint: "/check-connection"
+    version_endpoint: "/check-version"
+
+token: "<yourApiToken>"
