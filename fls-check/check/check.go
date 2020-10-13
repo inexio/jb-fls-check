@@ -155,7 +155,7 @@ func GetVersionCheck(url string, throwCritical bool, debug bool) []ErrorAndCode 
 /*
 GetWeeklyUsageReport is a function to sent a request against fls api and parse and check the /reportapi response with a calculation of the usage percentage to your threshold if exceeded you will get a warning message
 */
-func GetWeeklyUsageReport(url string, token string, startDate string, endDate string, threshold int, debug bool) ([]ErrorAndCode, []monitoringplugin.PerformanceDataPoint) {
+func GetWeeklyUsageReport(url string, token string, startDate string, endDate string, threshold int, debug bool, duration int) ([]ErrorAndCode, []monitoringplugin.PerformanceDataPoint) {
 	var errSlice []ErrorAndCode
 	var resp OverallReport
 	if url == "" {
@@ -163,6 +163,13 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 	}
 	if token == "" {
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("This token must not be empty")})
+	}
+	if duration != 0 {
+		if startDate != "" || endDate != ""{
+			errSlice = append(errSlice, ErrorAndCode{2, errors.New("start or end Date must not be set if a duration is set")})
+			return errSlice, nil
+		}
+		startDate, endDate = durationHandler(duration)
 	}
 	if startDate == "" {
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("This start date must not be empty (YYYY-MM-DD)")})
@@ -250,3 +257,13 @@ func OutputMonitoring(errSlice []ErrorAndCode, defaultMessage string, performanc
 	}
 	response.OutputAndExit()
 }
+
+func durationHandler(duration int) (string, string) {
+	endTime := time.Now()
+	startTime := endTime.AddDate(0, 0, -duration)
+	endDate := endTime.Format("2006-01-02")
+	startDate := startTime.Format("2006-01-02")
+
+	return startDate, endDate
+}
+
