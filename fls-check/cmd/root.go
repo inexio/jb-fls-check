@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -27,6 +28,9 @@ And if the server is connected to the account services from JetBrains, the curre
 		if viper.GetBool("debug") {
 			debug = true
 		}
+
+		check.Client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: viper.GetBool("insecure-ssl-cert")})
+
 		if viper.GetBool("getHealth") {
 			url := buildURL(https, hostname, endpoint, "hostname.health_endpoint", "/health")
 			errSlice := check.GetHealthCheck(url, debug)
@@ -62,6 +66,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&endpoint, "endpoint", "", "use this flag to set endpoint")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "use this flag to switch to debug mode")
 	rootCmd.PersistentFlags().BoolVar(&https, "https", false, "use this flag set https prefix")
+	rootCmd.PersistentFlags().Bool("insecure-ssl-cert", false, "accept an insecure ssl certificate")
 	rootCmd.Flags().Bool("getHealth", false, "use this flag to get the health of the server")
 	rootCmd.Flags().Bool("getConnection", false, "use this flag to fls-check if the server got connection to JetBrains Services")
 	rootCmd.Flags().Bool("getVersion", false, "use this flag to fls-check if the server runs on the latest version")
@@ -71,7 +76,7 @@ func init() {
 	viper.BindPFlag("getConnection", rootCmd.Flags().Lookup("getConnection"))
 	viper.BindPFlag("getVersion", rootCmd.Flags().Lookup("getVersion"))
 	viper.BindPFlag("throwCritical", rootCmd.Flags().Lookup("throwCritical"))
-
+	viper.BindPFlag("insecure-ssl-cert", rootCmd.PersistentFlags().Lookup("insecure-ssl-cert"))
 }
 
 func initConfig() {

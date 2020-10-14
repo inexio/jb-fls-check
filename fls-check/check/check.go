@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var Client = resty.New()
+
 /*
 HealthResponse is a struct for parsing the json response of the /health request
 */
@@ -62,8 +64,7 @@ func GetHealthCheck(url string, debug bool) []ErrorAndCode {
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("The url must not be empty")})
 		return errSlice
 	}
-	c := resty.New()
-	request := c.SetDebug(debug).SetDebugBodyLimit(1000).R()
+	request := Client.SetDebug(debug).SetDebugBodyLimit(1000).R()
 	response, err := request.Get(url)
 	if err != nil {
 		errSlice = append(errSlice, ErrorAndCode{3, errors.Wrap(err, "error during http request")})
@@ -93,8 +94,7 @@ func GetConnectionCheck(url string, debug bool) []ErrorAndCode {
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("This URL must be not empty")})
 		return errSlice
 	}
-	c := resty.New()
-	request := c.SetDebug(debug).SetDebugBodyLimit(1000).R()
+	request := Client.SetDebug(debug).SetDebugBodyLimit(1000).R()
 	response, err := request.Get(url)
 	if err != nil {
 		errSlice = append(errSlice, ErrorAndCode{3, errors.Wrap(err, "error during http request")})
@@ -120,8 +120,7 @@ func GetVersionCheck(url string, throwCritical bool, debug bool) []ErrorAndCode 
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("This URL must be not empty")})
 		return errSlice
 	}
-	c := resty.New()
-	request := c.SetDebug(debug).SetDebugBodyLimit(1000).R()
+	request := Client.SetDebug(debug).SetDebugBodyLimit(1000).R()
 	response, err := request.Get(url)
 	if err != nil {
 		errSlice = append(errSlice, ErrorAndCode{3, errors.Wrap(err, "error during http request")})
@@ -165,7 +164,7 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 		errSlice = append(errSlice, ErrorAndCode{2, errors.New("This token must not be empty")})
 	}
 	if duration != 0 {
-		if startDate != "" || endDate != ""{
+		if startDate != "" || endDate != "" {
 			errSlice = append(errSlice, ErrorAndCode{2, errors.New("start or end Date must not be set if a duration is set")})
 			return errSlice, nil
 		}
@@ -194,8 +193,7 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 	if len(errSlice) > 0 {
 		return errSlice, nil
 	}
-	c := resty.New()
-	request := c.SetDebug(debug).SetDebugBodyLimit(1000).R()
+	request := Client.SetDebug(debug).SetDebugBodyLimit(1000).R()
 	response, err := request.SetQueryParams(map[string]string{
 		"granularity": "0",
 		"start":       startDate,
@@ -266,4 +264,3 @@ func durationHandler(duration int) (string, string) {
 
 	return startDate, endDate
 }
-
