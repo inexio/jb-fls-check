@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"jb-fls-check/fls-check/check"
@@ -26,6 +27,9 @@ This usage percentage value can you fls-check with a threshold you define as a p
 		if viper.GetBool("debug") {
 			debug = true
 		}
+
+		check.Client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: viper.GetBool("insecure-ssl-cert")})
+
 		startDate := cmd.Flag("startDate").Value.String()
 		endDate := cmd.Flag("endDate").Value.String()
 		token := cmd.Flag("token").Value.String()
