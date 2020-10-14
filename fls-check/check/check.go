@@ -230,7 +230,7 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 		} else if resp.Report[i].MaxAvailable > 0 {
 			percentageValue := (resp.Report[i].MaxUsage / resp.Report[i].MaxAvailable) * 100
 			if percentageValue >= threshold {
-				errSlice = append(errSlice, ErrorAndCode{1, errors.New("Your threshold for " + resp.Report[i].License + "is exceeded, please fls-check the licenses on the server")})
+				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your threshold (" + strconv.Itoa(threshold) +  "%) is exceeded please move new licenses to the server")})
 			} else {
 				errSlice = append(errSlice, ErrorAndCode{0, errors.New("The Licenses Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%")})
 			}
