@@ -79,14 +79,11 @@ func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
 	} else {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			fmt.Println(err)
-		}
-		viper.AddConfigPath(home + "/go/src/jb-fls-check/fls-check/config")
+		viper.AddConfigPath(os.ExpandEnv("$HOME/go/src/jb-fls-check/fls-check/config"))
 		viper.AddConfigPath("../config")
 		viper.AddConfigPath("/var/opt/jb-fls-fls-check")
 		viper.SetConfigName("config")
+		viper.SetConfigType("yaml")
 
 		replacer := strings.NewReplacer(".", "_")
 		viper.SetEnvKeyReplacer(replacer)
