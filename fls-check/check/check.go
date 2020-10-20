@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-resty/resty/v2"
-	"github.com/inexio/go-monitoringplugin"
 	"github.com/pkg/errors"
+	"github.com/inexio/go-monitoringplugin"
 	"regexp"
 	"strconv"
 	"strings"
@@ -233,10 +233,10 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 			}
 		} else if resp.Report[i].MaxAvailable > 0 {
 			percentageValue := (resp.Report[i].MaxUsage / resp.Report[i].MaxAvailable) * 100
-			if percentageValue >= warningThreshold && percentageValue <= criticalThreshold {
+			if percentageValue >= criticalThreshold {
+				errSlice = append(errSlice, ErrorAndCode{2, errors.New("The License Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your criticalThreshold (" + strconv.Itoa(criticalThreshold) + "%) is exceeded please move new licenses to the server")})
+			} else if percentageValue >= warningThreshold {
 				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) + "%) is exceeded please move new licenses to the server")})
-			} else if percentageValue >= criticalThreshold {
-				errSlice = append(errSlice, ErrorAndCode{2, errors.New("The License Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) + "%) is exceeded please move new licenses to the server")})
 			} else {
 				errSlice = append(errSlice, ErrorAndCode{0, errors.New("The Licenses Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%")})
 			}
