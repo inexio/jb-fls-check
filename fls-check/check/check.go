@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
- var Client = resty.New()
+var Client = resty.New()
 
 /*
 HealthResponse is a struct for parsing the json response of the /health request
@@ -202,7 +202,7 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 		"granularity": "0",
 		"start":       startDate,
 		"end":         endDate,
-		"token": 	   token,
+		"token":       token,
 	}).Post(url)
 
 	if err != nil {
@@ -221,8 +221,8 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 		licenseString := r.ReplaceAllString(strings.ToLower(resp.Report[i].License), "_")
 		maxUsage := "max_usage_" + licenseString
 		maxAvailable := "max_available_" + licenseString
-		performanceDataSlice = append(performanceDataSlice, *monitoringplugin.NewPerformanceDataPoint(maxUsage, float64(resp.Report[i].MaxUsage), ""))
-		performanceDataSlice = append(performanceDataSlice, *monitoringplugin.NewPerformanceDataPoint(maxAvailable, float64(resp.Report[i].MaxAvailable), ""))
+		performanceDataSlice = append(performanceDataSlice, *monitoringplugin.NewPerformanceDataPoint(maxUsage, resp.Report[i].MaxUsage, ""))
+		performanceDataSlice = append(performanceDataSlice, *monitoringplugin.NewPerformanceDataPoint(maxAvailable, resp.Report[i].MaxAvailable, ""))
 
 		if resp.Report[i].MaxAvailable == 0 {
 			if resp.Report[i].MaxUsage > 0 {
@@ -233,10 +233,10 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 			}
 		} else if resp.Report[i].MaxAvailable > 0 {
 			percentageValue := (resp.Report[i].MaxUsage / resp.Report[i].MaxAvailable) * 100
-			if percentageValue >= warningThreshold && percentageValue <= criticalThreshold{
-				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) +  "%) is exceeded please move new licenses to the server")})
-			} else if percentageValue >= criticalThreshold{
-				errSlice = append(errSlice, ErrorAndCode{2, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) +  "%) is exceeded please move new licenses to the server")})
+			if percentageValue >= warningThreshold && percentageValue <= criticalThreshold {
+				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) + "%) is exceeded please move new licenses to the server")})
+			} else if percentageValue >= criticalThreshold {
+				errSlice = append(errSlice, ErrorAndCode{2, errors.New("The License Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) + "%) is exceeded please move new licenses to the server")})
 			} else {
 				errSlice = append(errSlice, ErrorAndCode{0, errors.New("The Licenses Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%")})
 			}
