@@ -38,7 +38,7 @@ This usage percentage value can you fls-check with a threshold you define as a p
 			token = viper.GetString("token")
 		}
 		url := buildURL(https, hostname, endpoint, "hostname.report_endpoint", "/reportapi")
-		errSlice, responseWeekly := check.GetWeeklyUsageReport(url, token, startDate, endDate, 90, debug, duration)
+		errSlice, responseWeekly := check.GetWeeklyUsageReport(url, token, startDate, endDate, 50,90, debug, duration)
 		check.OutputMonitoring(errSlice, "weekly report checked", responseWeekly)
 
 		err := cmd.Help()

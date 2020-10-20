@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-var Client = resty.New()
+ var Client = resty.New()
 
 /*
 HealthResponse is a struct for parsing the json response of the /health request
@@ -154,7 +154,7 @@ func GetVersionCheck(url string, throwCritical bool, debug bool) []ErrorAndCode 
 /*
 GetWeeklyUsageReport is a function to sent a request against fls api and parse and check the /reportapi response with a calculation of the usage percentage to your threshold if exceeded you will get a warning message
 */
-func GetWeeklyUsageReport(url string, token string, startDate string, endDate string, threshold int, debug bool, duration int) ([]ErrorAndCode, []monitoringplugin.PerformanceDataPoint) {
+func GetWeeklyUsageReport(url string, token string, startDate string, endDate string, warningThreshold int, criticalThreshold int, debug bool, duration int) ([]ErrorAndCode, []monitoringplugin.PerformanceDataPoint) {
 	var errSlice []ErrorAndCode
 	var resp OverallReport
 	if url == "" {
@@ -186,8 +186,12 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 			errSlice = append(errSlice, ErrorAndCode{2, errors.Wrap(err, "The end date is not in the right syntax use (YYYY-MM-DD)")})
 		}
 	}
-	if threshold <= 0 || threshold >= 100 {
-		errSlice = append(errSlice, ErrorAndCode{2, errors.New("The threshold have to be greater than 0 and lower than 100")})
+	if warningThreshold <= 0 || warningThreshold >= 100 {
+		errSlice = append(errSlice, ErrorAndCode{2, errors.New("The warningThreshold have to be greater than 0 and lower than 100")})
+
+	}
+	if criticalThreshold <= 0 || criticalThreshold >= 100 {
+		errSlice = append(errSlice, ErrorAndCode{2, errors.New("The criticalThreshold have to be greater than 0 and lower than 100")})
 
 	}
 	if len(errSlice) > 0 {
@@ -198,7 +202,7 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 		"granularity": "0",
 		"start":       startDate,
 		"end":         endDate,
-		"token":       token,
+		"token": 	   token,
 	}).Post(url)
 
 	if err != nil {
@@ -229,8 +233,10 @@ func GetWeeklyUsageReport(url string, token string, startDate string, endDate st
 			}
 		} else if resp.Report[i].MaxAvailable > 0 {
 			percentageValue := (resp.Report[i].MaxUsage / resp.Report[i].MaxAvailable) * 100
-			if percentageValue >= threshold {
-				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your threshold (" + strconv.Itoa(threshold) +  "%) is exceeded please move new licenses to the server")})
+			if percentageValue >= warningThreshold && percentageValue <= criticalThreshold{
+				errSlice = append(errSlice, ErrorAndCode{1, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) +  "%) is exceeded please move new licenses to the server")})
+			} else if percentageValue >= criticalThreshold{
+				errSlice = append(errSlice, ErrorAndCode{2, errors.New("The License Usage for " +  resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%, your warningThreshold (" + strconv.Itoa(warningThreshold) +  "%) is exceeded please move new licenses to the server")})
 			} else {
 				errSlice = append(errSlice, ErrorAndCode{0, errors.New("The Licenses Usage for " + resp.Report[i].License + " is " + strconv.Itoa(percentageValue) + "%")})
 			}
